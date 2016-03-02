@@ -1,7 +1,7 @@
 //
 //  ViewController.m
 //  paulproject1
-//
+//  Calculator:输入时即按照后缀表达式的形式输入，如计算3+5：3 5 +
 //  Created by lxq on 16/2/29.
 //  Copyright (c) 2016年 lxq. All rights reserved.
 //
@@ -21,34 +21,42 @@ BOOL notFirstEnteredDot=false;
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.operandStack =[[NSMutableArray alloc]initWithCapacity:NSNumberFormatterNoStyle];
+    self.rightNowDisplay.text=@"";
     }
 - (IBAction)appendDigit:(UIButton *)sender {//输入数字
     NSString *number=sender.currentTitle;
     if (notFirstEnteredNumber==false) {
-        _display.text=number;
+        self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@" "];
+        self.display.text=number;
         notFirstEnteredNumber=true;
     }else{
-        _display.text=[_display.text stringByAppendingString:number];
+        self.display.text=[self.display.text stringByAppendingString:number];
     }
+    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:number];
 }
 - (IBAction)appendDot:(UIButton *)sender {//输入小数点
     if (notFirstEnteredNumber==false) {
-        _display.text=@"0.";
+        self.display.text=@"0.";
+        self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@"0."];
         notFirstEnteredNumber=true;
     }else if(notFirstEnteredDot==false){
-        _display.text=[_display.text stringByAppendingString:@"."];
+        self.display.text=[self.display.text stringByAppendingString:@"."];
+        self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@"."];
     }
     notFirstEnteredDot=true;
 }
 - (IBAction)appendPi:(UIButton *)sender {//输入PI
     [self enter:nil];
+    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@" "];
     [self.operandStack addObject:[NSNumber numberWithDouble:M_PI]];
-    _display.text=[NSString stringWithFormat:@"%f",M_PI];
+    self.display.text=[NSString stringWithFormat:@"%f",M_PI];
+    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@"%f",M_PI]];
     NSLog(@"%@",self.operandStack);
 }
 - (IBAction)clearAll:(UIButton *)sender {//重新输入
     [self.operandStack removeAllObjects];
     self.display.text=@"0";
+    self.rightNowDisplay.text=@"";
     notFirstEnteredNumber=false;
 }
 
@@ -57,7 +65,6 @@ BOOL notFirstEnteredDot=false;
     notFirstEnteredDot=false;
     double doubleDisplay=[_display.text doubleValue];
     [self.operandStack addObject:[NSNumber numberWithDouble:doubleDisplay]];
-    [self.rightNowDisplay.text stringByAppendingString:_display.text];
     NSLog(@"%@",self.operandStack);
 }
 
@@ -82,7 +89,7 @@ BOOL notFirstEnteredDot=false;
         tempresult=operationOne([[self.operandStack objectAtIndex:arrayCount-1]doubleValue]);
         [self.operandStack removeLastObject];
         tempnumber=@(tempresult);
-        _display.text=[tempnumber stringValue];
+        self.display.text=[tempnumber stringValue];
         [self enter:nil];
     }
 }
@@ -91,6 +98,7 @@ BOOL notFirstEnteredDot=false;
     if (notFirstEnteredNumber==true)
         [self enter:nil];
     NSString *operate=sender.currentTitle;
+    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@" %@",operate]];
     double (^mutiply)(double,double)=^(double op1,double op2){//乘法
         [self.operandStack removeLastObject];
         return  op1*op2;
