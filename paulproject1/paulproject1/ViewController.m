@@ -16,12 +16,11 @@
 @implementation ViewController
 BOOL notFirstEnteredNumber=false;
 BOOL notFirstEnteredDot=false;
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.operandStack =[[NSMutableArray alloc]initWithCapacity:NSNumberFormatterNoStyle];
-    self.rightNowDisplay.text=@"";
+    self.rightNowDisplay.text=@" ";
     }
 - (IBAction)appendDigit:(UIButton *)sender {//输入数字
     NSString *number=sender.currentTitle;
@@ -47,10 +46,9 @@ BOOL notFirstEnteredDot=false;
 }
 - (IBAction)appendPi:(UIButton *)sender {//输入PI
     [self enter:nil];
-    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@" "];
     [self.operandStack addObject:[NSNumber numberWithDouble:M_PI]];
     self.display.text=[NSString stringWithFormat:@"%f",M_PI];
-    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@"%f",M_PI]];
+    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@" %f",M_PI]];
     NSLog(@"%@",self.operandStack);
 }
 - (IBAction)clearAll:(UIButton *)sender {//重新输入
@@ -63,20 +61,17 @@ BOOL notFirstEnteredDot=false;
 - (IBAction)enter:(UIButton *)sender {//一串数字输入完毕
     notFirstEnteredNumber=false;
     notFirstEnteredDot=false;
-    double doubleDisplay=[_display.text doubleValue];
-    [self.operandStack addObject:[NSNumber numberWithDouble:doubleDisplay]];
+    [self.operandStack addObject:self.displayValue];
     NSLog(@"%@",self.operandStack);
 }
 
 -(void)performTwoOperation:(double(^)(double,double))operationTwo{//二元运算
     double arrayCount=self.operandStack.count;
     double tempresult;
-    NSNumber* tempnumber;
     if(arrayCount>=2){
         tempresult=operationTwo([[self.operandStack objectAtIndex:arrayCount-1]doubleValue],[[self.operandStack objectAtIndex:arrayCount-2]doubleValue]);
         [self.operandStack removeLastObject];
-        tempnumber=@(tempresult);
-        _display.text=[tempnumber stringValue];
+        self.displayValue=[NSNumber numberWithDouble:tempresult];
         [self.operandStack removeLastObject];
         [self enter:nil];
     }
@@ -84,12 +79,10 @@ BOOL notFirstEnteredDot=false;
 -(void)performOneOperation:(double(^)(double))operationOne{//一元运算
     double arrayCount=self.operandStack.count;
     double tempresult;
-    NSNumber* tempnumber;
     if(arrayCount>=1){
         tempresult=operationOne([[self.operandStack objectAtIndex:arrayCount-1]doubleValue]);
         [self.operandStack removeLastObject];
-        tempnumber=@(tempresult);
-        self.display.text=[tempnumber stringValue];
+        self.displayValue=[NSNumber numberWithDouble:tempresult];
         [self enter:nil];
     }
 }
@@ -99,48 +92,53 @@ BOOL notFirstEnteredDot=false;
         [self enter:nil];
     NSString *operate=sender.currentTitle;
     self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@" %@",operate]];
-    double (^mutiply)(double,double)=^(double op1,double op2){//乘法
-        [self.operandStack removeLastObject];
-        return  op1*op2;
-    };
-    double (^devided)(double,double)=^(double op1,double op2){//除法
-        [self.operandStack removeLastObject];
-        return  op2/op1;
-    };
-    double (^plus)(double,double)=^(double op1,double op2){//加法
-        [self.operandStack removeLastObject];
-        return  op1+op2;
-    };
-    double (^minus)(double,double)=^(double op1,double op2){//减法
-        [self.operandStack removeLastObject];
-        return  op2-op1;
-    };
-    double (^square)(double)=^(double op1){//开方
-        return  sqrt(op1);
-    };
-    double (^getsin)(double)=^(double op1){//正弦函数
-        return sin(op1*M_PI/180);
-    };
-    double (^getcos)(double)=^(double op1){//余弦函数
-        return cos(op1*M_PI/180);
-    };
     if ([operate isEqualToString:@"✕"]) {
-        [self performTwoOperation:mutiply];
+        [self performTwoOperation:^(double op1,double op2){//乘法
+            [self.operandStack removeLastObject];
+            return  op1*op2;
+            }
+         ];
     }else if ([operate isEqualToString:@"÷"]){
-        [self performTwoOperation:devided];
+        [self performTwoOperation:^(double op1,double op2){//除法
+            [self.operandStack removeLastObject];
+            return  op2/op1;
+            }
+         ];
     }else if ([operate isEqualToString:@"+"]){
-        [self performTwoOperation:plus];
+        [self performTwoOperation:^(double op1,double op2){//加法
+            [self.operandStack removeLastObject];
+            return  op1+op2;
+            }
+         ];
     }else if ([operate isEqualToString:@"−"]){
-        [self performTwoOperation:minus];
+        [self performTwoOperation:^(double op1,double op2){//减法
+            [self.operandStack removeLastObject];
+            return  op2-op1;
+            }
+         ];
     }else if ([operate isEqualToString:@"√"]){
-        [self performOneOperation:square];
+        [self performOneOperation:^(double op1){//开方
+            return  sqrt(op1);
+            }
+         ];
     }else if ([operate isEqualToString:@"sin"]){
-        [self performOneOperation:getsin];
+        [self performOneOperation:^(double op1){//正弦函数
+            return sin(op1*M_PI/180);
+            }
+         ];
     }else if ([operate isEqualToString:@"cos"]){
-        [self performOneOperation:getcos];
+        [self performOneOperation:^(double op1){//余弦函数
+            return cos(op1*M_PI/180);
+            }
+         ];
     }
 }
-
+-(NSNumber*)getDisplayValue{
+    return [NSNumber numberWithDouble:[_display.text doubleValue]];
+}
+-(void)setDisplayValue:(NSNumber *)displayValue{
+    self.display.text=[displayValue stringValue];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.

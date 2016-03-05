@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
+@property (getter = getDisplayValue, setter=setDisplayValue:) NSNumber* displayValue;
 -(IBAction)enter:(UIButton *)sender;
 -(void)performTwoOperation:(double(^)(double,double))operation;
 - (IBAction)operate:(UIButton *)sender;
