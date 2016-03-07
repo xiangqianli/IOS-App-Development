@@ -16,6 +16,37 @@
 @implementation ViewController
 BOOL notFirstEnteredNumber=false;
 BOOL notFirstEnteredDot=false;
+NSString *operationString=@"+ - × ÷ √ sin cos";
+-(int)countElements:(NSString *)str{
+    return [str length];
+}
+
+-(void)dropLast{
+    NSArray *listString=[self.rightNowDisplay.text componentsSeparatedByString:@" "];
+    int listCount=[listString count];
+    NSString *listLast=[listString objectAtIndex:listCount-1];
+    NSRange range=[operationString rangeOfString:listLast];
+    if ([self.display.text isEqual:@""]||range.location!=NSNotFound) {//上一次输入的是符号或display一直被删删完了
+        if ([listLast isEqualToString:@"+"]||[listLast isEqualToString:@"-"]||[listLast isEqualToString:@"÷"]||[listLast isEqualToString:@"×"]) {
+            [self.operandStack removeLastObject];
+            [self.operandStack addObject:[listString objectAtIndex:listCount-3]];
+            [self.operandStack addObject:[listString objectAtIndex:listCount-2]];
+        }else if ([listLast isEqualToString:@"√"]||[listLast isEqualToString:@"sin"]||[listLast isEqualToString:@"cos"]){
+            [self.operandStack removeLastObject];
+            [self.operandStack addObject:[listString objectAtIndex:listCount-2]];
+        }else{
+            [self.operandStack removeLastObject];
+        }
+        NSMutableArray *listDeleteString=[NSMutableArray arrayWithArray:listString];
+        [listDeleteString removeLastObject];
+        listString=[NSArray arrayWithArray:listDeleteString];
+        self.rightNowDisplay.text=[listString componentsJoinedByString:@" "];
+    }else{
+        self.display.text=[self.display.text substringToIndex:(self.display.text.length-1)];
+        self.rightNowDisplay.text=[self.rightNowDisplay.text substringToIndex:(self.rightNowDisplay.text.length-1)];
+    }
+    
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -54,8 +85,13 @@ BOOL notFirstEnteredDot=false;
 - (IBAction)clearAll:(UIButton *)sender {//重新输入
     [self.operandStack removeAllObjects];
     self.display.text=@"0";
-    self.rightNowDisplay.text=@"";
+    self.rightNowDisplay.text=@"0";
     notFirstEnteredNumber=false;
+}
+- (IBAction)backSpace:(UIButton *)sender {
+    if ([self countElements:self.rightNowDisplay.text]>0 ) {
+        [self dropLast];
+    }
 }
 
 - (IBAction)enter:(UIButton *)sender {//一串数字输入完毕

@@ -12,7 +12,8 @@
 @property (getter = getDisplayValue, setter=setDisplayValue:) NSNumber* displayValue;
 -(IBAction)enter:(UIButton *)sender;
 -(void)performTwoOperation:(double(^)(double,double))operation;
+-(int)countElements:(NSString *)str;
+-(void)dropLast;
 - (IBAction)operate:(UIButton *)sender;
-
 @end
 
