@@ -11,7 +11,6 @@
 
 @interface ViewController : UIViewController
 @property (getter = getDisplayValue, setter=setDisplayValue:) NSNumber* displayValue;
-@property (strong,nonatomic)CalculatorBrain *brain;
 -(IBAction)enter:(UIButton *)sender;
 
 -(int)countElements:(NSString *)str;

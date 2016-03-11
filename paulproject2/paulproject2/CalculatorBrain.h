@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface CalculatorBrain : NSObject
-@property(retain,nonatomic)NSMutableArray *operandStack;
 
 -(void)pushOperand:(double)operand;
 -(double)popOperand;

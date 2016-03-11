@@ -8,10 +8,16 @@
 
 #import "CalculatorBrain.h"
 @interface CalculatorBrain()
+@property(strong,nonatomic)NSMutableArray *operandStack;
+
 @end
 @implementation CalculatorBrain
 @synthesize operandStack=_operandStack;
 NSString *operationString=@"+ - × ÷ √ sin cos";
+-(instancetype)init{
+    self.operandStack=[[NSMutableArray alloc]init];
+    return self;
+}
 -(void)pushOperand:(double)operand{
     [_operandStack addObject:[NSNumber numberWithDouble:operand]];
 }

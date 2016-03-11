@@ -10,10 +10,11 @@
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *display;
 @property (weak, nonatomic) IBOutlet UILabel *rightNowDisplay;
+@property (strong,nonatomic) CalculatorBrain*brain;
 @end
 
 @implementation ViewController
-
+@synthesize brain=_brain;
 BOOL notFirstEnteredNumber=false;
 BOOL notFirstEnteredDot=false;
 NSString *operateString=@"+ - × ÷ √ sin cos";
@@ -50,7 +51,7 @@ NSString *operateString=@"+ - × ÷ √ sin cos";
     // Do any additional setup after loading the view, typically from a nib.
     self.rightNowDisplay.text=@" ";
     self.brain=[[CalculatorBrain alloc]init];
-    }
+}
 - (IBAction)appendDigit:(UIButton *)sender {//输入数字
     NSString *number=sender.currentTitle;
     if (notFirstEnteredNumber==false) {
@@ -81,7 +82,7 @@ NSString *operateString=@"+ - × ÷ √ sin cos";
 }
 - (IBAction)clearAll:(UIButton *)sender {//重新输入
     [self.brain cleanAll];
-    self.display.text=@"0";
+    self.display.text=@" ";
     self.rightNowDisplay.text=@"0";
     notFirstEnteredNumber=false;
 }
