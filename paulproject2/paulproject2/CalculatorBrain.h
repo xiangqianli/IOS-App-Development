@@ -9,10 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface CalculatorBrain : NSObject
-
--(void)pushOperand:(double)operand;
+-(NSNumber*)pushOperand:(NSString*)operand;
 -(double)popOperand;
--(double)performOperation:(NSString *)operand;
+-(NSNumber *)performOperation:(NSString*)operand;
 -(void)cleanAll;
 
 @end

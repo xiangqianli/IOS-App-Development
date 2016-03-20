@@ -20,11 +20,10 @@ BOOL notFirstEnteredDot=false;
 NSString *operateString=@"+ - × ÷ √ sin cos";
 
 
--(int)countElements:(NSString *)str{
+- (int)countElements:(NSString *)str{
     return [[NSString stringWithFormat:@"%lu",(unsigned long)str.length] intValue];
 }
-
--(void)dropLast{
+- (void)dropLast{
     NSArray *listString=[self.rightNowDisplay.text componentsSeparatedByString:@" "];
     unsigned long listCount=[listString count];
     NSString *listLast=[listString objectAtIndex:listCount-1];
@@ -32,10 +31,10 @@ NSString *operateString=@"+ - × ÷ √ sin cos";
     if ([self.display.text isEqual:@""]||range.location!=NSNotFound) {//上一次输入的是符号或display一直被删删完了
         [self.brain popOperand];
         if ([listLast isEqualToString:@"+"]||[listLast isEqualToString:@"-"]||[listLast isEqualToString:@"÷"]||[listLast isEqualToString:@"×"]) {
-            [self.brain pushOperand:[[listString objectAtIndex:listCount-3] doubleValue]];
-            [self.brain pushOperand:[[listString objectAtIndex:listCount-2] doubleValue]];
+            [self.brain pushOperand:[listString objectAtIndex:listCount-3]];
+            [self.brain pushOperand:[listString objectAtIndex:listCount-2]];
         }else if ([listLast isEqualToString:@"√"]||[listLast isEqualToString:@"sin"]||[listLast isEqualToString:@"cos"]){
-            [self.brain pushOperand:[[listString objectAtIndex:listCount-2] doubleValue]];
+            [self.brain pushOperand:[listString objectAtIndex:listCount-2]];
         }
         NSMutableArray *listDeleteString=[NSMutableArray arrayWithArray:listString];
         [listDeleteString removeLastObject];
@@ -54,13 +53,18 @@ NSString *operateString=@"+ - × ÷ √ sin cos";
 }
 - (IBAction)appendDigit:(UIButton *)sender {//输入数字
     NSString *number=sender.currentTitle;
+    if ([number isEqualToString:@"π"]) {
+        if (notFirstEnteredNumber==true)
+            [self enter:nil];
+        [self.brain pushOperand:[NSString stringWithFormat:@"%f",M_PI]];
+    }
     if (notFirstEnteredNumber==false) {
         self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:@" "];
         self.display.text=number;
-        notFirstEnteredNumber=true;
-    }else{
+        if (![number isEqualToString:@"π"])
+            notFirstEnteredNumber=true;
+    }else
         self.display.text=[self.display.text stringByAppendingString:number];
-    }
     self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:number];
 }
 - (IBAction)appendDot:(UIButton *)sender {//输入小数点
@@ -74,44 +78,43 @@ NSString *operateString=@"+ - × ÷ √ sin cos";
     }
     notFirstEnteredDot=true;
 }
-- (IBAction)appendPi:(UIButton *)sender {//输入PI
-    [self enter:nil];
-    [self.brain pushOperand:M_PI];
-    self.display.text=[NSString stringWithFormat:@"%f",M_PI];
-    self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@" %f",M_PI]];
-}
 - (IBAction)clearAll:(UIButton *)sender {//重新输入
     [self.brain cleanAll];
     self.display.text=@" ";
-    self.rightNowDisplay.text=@"0";
+    self.rightNowDisplay.text=@" ";
     notFirstEnteredNumber=false;
 }
 - (IBAction)backSpace:(UIButton *)sender {
-    if ([self countElements:self.rightNowDisplay.text]>0 ) {
+    if ([self countElements:self.rightNowDisplay.text]>0)
         [self dropLast];
+}
+- (IBAction)enter:(UIButton *)sender {//一串数字输入完毕
+    if (![self.display.text isEqualToString:@"π"]&&notFirstEnteredNumber==true){
+        [self.brain pushOperand:[self.displayValue stringValue]];
+        notFirstEnteredNumber=false;
+        notFirstEnteredDot=false;
     }
 }
-
-- (IBAction)enter:(UIButton *)sender {//一串数字输入完毕
-    notFirstEnteredNumber=false;
-    notFirstEnteredDot=false;
-    [self.brain pushOperand:[self.displayValue doubleValue]];
-}
-
-
 - (IBAction)operate:(UIButton *)sender {
     NSString *operation=sender.currentTitle;
     self.rightNowDisplay.text=[self.rightNowDisplay.text stringByAppendingString:[NSString stringWithFormat:@" %@",operation]];
     if (notFirstEnteredNumber==true)
         [self enter:nil];
-    double result=[self.brain performOperation:operation];
-    self.displayValue=[NSNumber numberWithDouble:result];
+    self.displayValue=[self.brain pushOperand:operation];
 }
--(NSNumber*)getDisplayValue{
-    return [NSNumber numberWithDouble:[_display.text doubleValue]];
+- (NSNumber* _Nullable)getDisplayValue{
+    if ([[NSScanner scannerWithString:_display.text]scanDouble:nil])
+        return [NSNumber numberWithDouble:[_display.text doubleValue]];
+    else
+        return nil;
 }
--(void)setDisplayValue:(NSNumber *)displayValue{
-    self.display.text=[displayValue stringValue];
+- (void)setDisplayValue:(NSString *)displayValue{
+    if ([displayValue isEqual:nil]){
+        self.display.text=@"Error!";
+        [self dropLast];
+    }
+    else
+        self.display.text=displayValue;
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

@@ -7,9 +7,13 @@
 //
 
 #import "CalculatorBrain.h"
+typedef NS_ENUM(NSInteger,OperationStyle){
+    NumberStyle,
+    OneOperationStyle,
+    TwoOperationStyle
+};
 @interface CalculatorBrain()
 @property(strong,nonatomic)NSMutableArray *operandStack;
-
 @end
 @implementation CalculatorBrain
 @synthesize operandStack=_operandStack;
@@ -18,47 +22,66 @@ NSString *operationString=@"+ - × ÷ √ sin cos";
     self.operandStack=[[NSMutableArray alloc]init];
     return self;
 }
--(void)pushOperand:(double)operand{
-    [_operandStack addObject:[NSNumber numberWithDouble:operand]];
+-(NSString *)pushOperand:(NSString*)operand{
+    NSLog(@"%@",self.operandStack);
+    NSNumber *tempresult=nil;
+    tempresult=[self performOperation:operand];
+    if (tempresult!=nil)
+        [self.operandStack addObject:tempresult];
+    NSLog(@"%@",self.operandStack);
+    return [NSString stringWithFormat:@"%@",tempresult];
 }
 -(double)popOperand{
-    double arrayCount=_operandStack.count;
+    double arrayCount=self.operandStack.count;
     NSNumber *number;
     if (arrayCount>0) {
-        number=[_operandStack objectAtIndex:arrayCount-1];
-        [_operandStack removeLastObject];
+        number=[self.operandStack objectAtIndex:arrayCount-1];
+        [self.operandStack removeLastObject];
     }else
         NSLog(@"no more operand");
     return [number doubleValue];
 }
--(double)performOperation:(NSString *)operand{
+-(OperationStyle)judgeType:(NSString *)operand{
     NSRange range=[operationString rangeOfString:operand];
-    if (range.location!=NSNotFound) {
-        if (range.location<7) {
+    if (range.location==NSNotFound)
+        return NumberStyle;
+    else if (range.location<7)
+        return TwoOperationStyle;
+    else if(range.location>7)
+        return OneOperationStyle;
+    return 0;
+}
+
+-(NSNumber *)performOperation:(NSString *)operand{
+    OperationStyle typeNumber=[self judgeType:operand];
+    NSNumber *tresult=nil;
+        if (typeNumber==TwoOperationStyle&&self.operandStack.count>1) {
             double lastValue=[self popOperand];
             double firstValue=[self popOperand];
             if ([operand isEqualToString:@"+"])
-                return lastValue+firstValue;
+                tresult=[NSNumber numberWithDouble:lastValue+firstValue];
             else if ([operand isEqualToString:@"-"])
-                return firstValue-lastValue;
+                tresult=[NSNumber numberWithDouble:firstValue-lastValue];
             else if ([operand isEqualToString:@"*"])
-                return firstValue*lastValue;
+                tresult=[NSNumber numberWithDouble:firstValue*lastValue];
             else if ([operand isEqualToString:@"÷"])
-                return firstValue/lastValue;
-        }else{
+                tresult=[NSNumber numberWithDouble:firstValue/lastValue];
+        }else if(typeNumber==OneOperationStyle&&self.operandStack.count>0){
             double value=[self popOperand];
             if ([operand isEqualToString:@"√"])
-                return sqrt(value);
+                tresult=[NSNumber numberWithDouble:sqrt(value)];
             else if ([operand isEqualToString:@"sin"])
-                return sin(value*M_PI/180);
+                tresult= [NSNumber numberWithDouble:sin(value*M_PI/180)];
             else if([operand isEqualToString:@"cos"])
-                return cos(value*M_PI/180);
+                tresult= [NSNumber numberWithDouble:cos(value*M_PI/180)];
         }
-    }else
-        return [operand doubleValue];
-    return 0;
+        else if(typeNumber==NumberStyle)
+            tresult= [NSNumber numberWithDouble:[operand doubleValue]];
+    return tresult;
 }
+
 -(void)cleanAll{
     [self.operandStack removeAllObjects];
 }
+
 @end
